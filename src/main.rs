@@ -27,11 +27,13 @@ fn main() {
           Err(e) => { println!("{}",e); break; } ,
         };
         let command=args.remove(0);
-        let output=Command::new(&command)
+        let mut child=Command::new(&command)
             .args(&args)
-            .output()
+            .spawn()
             .expect("Lee la documentacion, animal");
-    
+        let output= child.wait_with_output().
+                         expect("Failed to wait child");
+  
         let stdout = io::stdout();
         let mut handle = stdout.lock();
         handle.write( &output.stdout );
