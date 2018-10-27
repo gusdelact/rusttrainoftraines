@@ -3,7 +3,9 @@ use std::io::Write;
 use std::process::Command;
 
 fn parser(input : &String ) -> Result < Vec<&str> , String  > {
-    let mut args: Vec<&str> = input.split(' ').collect();
+    let commands:Vec<&str>= input.split(';').collect();
+
+    let mut args: Vec<&str> = input.split_whitespace().collect();
     let command=args[0];
     if command == "exit" {
       Err("Mr Stark I don´t want to die :/".to_string())
