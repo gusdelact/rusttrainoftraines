@@ -4,6 +4,8 @@ use std::io::Read;
 use std::error::Error;   
 use std::process::Command;
 use std::process::Stdio;
+use std::process::exit;
+
 #[allow(dead_code)]
 #[derive(Debug)]
 struct Comando<'a> {
@@ -108,15 +110,15 @@ fn ejecutar_pipe(pipe: &Vec<Comando> ) {
         };
 //tomar entrada estandar del siguiente comando
         match child_despues.stdin.unwrap().write_all(&salida) {
-        Err(why) => panic!("couldn't write to wc stdin: {}",
+        Err(why) => panic!("couldn't write to stdin: {}",
                            why.description()),
-           Ok(_) => println!("sent to wc"),
+           Ok(_) => println!("sent to {}", comando_despues.binario ),
         }
         let mut s = String::new();
        match child_despues.stdout.unwrap().read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read wc stdout: {}",
+        Err(why) => panic!("couldn't read stdout: {}",
                            why.description()),
-        Ok(_) => print!("wc responded with:\n{}", s),
+        Ok(_) => print!("{} responded with:\n{}", comando_despues.binario , s),
        }
 } //ejecutar_pipe
 
@@ -131,7 +133,7 @@ fn test_ejecutar_pipe( ) {
 
 fn main() {
   loop {
-    print!("gush! ");
+    println!("gush! ");
 
     let mut input = String::new();
     io::stdin().read_line(&mut input);
@@ -139,8 +141,15 @@ fn main() {
     input.truncate(len);
 
     if ! input.is_empty() {
-        let  lote =   parserv2(&input,";".to_string()) ;
-        ejecutar_lote(&lote);
+        if input.contains("|") { 
+           let  pipe =   parserv2(&input,"|".to_string()) ;
+           ejecutar_pipe(&pipe);
+        } else if input.contains("exit")  {
+           exit(0);
+        } else {
+           let  lote =   parserv2(&input,";".to_string()) ;
+           ejecutar_lote(&lote);
+        }
    } //if
   }
 }
